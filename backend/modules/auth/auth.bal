@@ -1,10 +1,10 @@
 import ballerina/crypto;
-import ballerina/time;
 import ballerina/uuid;
 import ballerina/sql;
 import ballerinax/postgresql;
 import ballerina/email;
 import backend.types;
+import ballerina/io;
 
 public class AuthHandler {
     private final postgresql:Client dbClient;
@@ -52,30 +52,37 @@ public class AuthHandler {
         types:User|error result = self.dbClient->queryRow(query);
 
         if result is types:User {
-            // Generate a secure random token
-            string resetToken = uuid:createType1AsString();
+            do {
+                // Generate a secure random token
+                string resetToken = uuid:createType1AsString();
 
-            // Hash the token before storing it
-            byte[] resetTokenHash = crypto:hashSha256(resetToken.toBytes());
-            string hashedResetToken = resetTokenHash.toBase16();
+                // Hash the token before storing it
+                byte[] resetTokenHash = crypto:hashSha256(resetToken.toBytes());
+                string hashedResetToken = resetTokenHash.toBase16();
 
-            // Set expiration time (1 hour from now)
-            time:Utc expirationTime = time:utcAddSeconds(time:utcNow(), 3600);
+                // Store the hashed reset token in the database
+                sql:ParameterizedQuery updateQuery = `
+                    UPDATE users 
+                    SET reset_token = ${hashedResetToken}, 
+                        reset_token_expires = (CURRENT_TIMESTAMP + INTERVAL '1 hour')
+                    WHERE email = ${email}
+                `;
+                _ = check self.dbClient->execute(updateQuery);
 
-            // Store the hashed reset token in the database
-            sql:ParameterizedQuery updateQuery = `
-                UPDATE users 
-                SET reset_token = ${hashedResetToken}, reset_token_expires = ${expirationTime} 
-                WHERE email = ${email}
-            `;
-            _ = check self.dbClient->execute(updateQuery);
+                // Construct the password reset URL
+                string resetUrl = "http://localhost:3000/reset-password?token=" + resetToken;
 
-            // Construct the password reset URL
-            string resetUrl = "http://localhost:3000/reset-password?token=" + resetToken;
-
-            // Send email with password reset link
-            check self.sendPasswordResetEmail(email, resetUrl);
+                // Send email with password reset link
+                check self.sendPasswordResetEmail(email, resetUrl);
+            } on fail var e {
+                // Log error internally, but don't expose it
+                io:println("Error sending password reset email: ", e.message());
+                // This ensures same behavior for both success and failure cases
+                return;
+            }
         }
+        // Return success for both existing and non-existing emails
+        return;
     }
 
     // Function to reset password
@@ -124,7 +131,7 @@ public class AuthHandler {
                 If you did not request a password reset, please ignore this email.
 
                 Best regards,
-                Your UniHope Team
+                The UniHope Team
             `
         };
 

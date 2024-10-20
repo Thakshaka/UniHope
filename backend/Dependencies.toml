@@ -15,6 +15,7 @@ dependencies = [
 	{org = "ballerina", name = "crypto"},
 	{org = "ballerina", name = "email"},
 	{org = "ballerina", name = "http"},
+	{org = "ballerina", name = "io"},
 	{org = "ballerina", name = "sql"},
 	{org = "ballerina", name = "time"},
 	{org = "ballerina", name = "uuid"},
@@ -27,7 +28,6 @@ modules = [
 	{org = "asus", packageName = "backend", moduleName = "backend.auth"},
 	{org = "asus", packageName = "backend", moduleName = "backend.cors"},
 	{org = "asus", packageName = "backend", moduleName = "backend.db"},
-	{org = "asus", packageName = "backend", moduleName = "backend.model"},
 	{org = "asus", packageName = "backend", moduleName = "backend.types"}
 ]
 
@@ -138,6 +138,9 @@ version = "1.6.1"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "lang.value"}
+]
+modules = [
+	{org = "ballerina", packageName = "io", moduleName = "io"}
 ]
 
 [[package]]

@@ -43,54 +43,6 @@ db:DatabaseHandler dbHandler = new(dbClient);
 cors:CorsHandler corsHandler = new("http://localhost:3000");
 
 service /api on new http:Listener(serverPort) {
-    // Forgot Password endpoint
-    resource function post forgot\-password(@http:Payload json payload) returns http:Response {
-        http:Response response = new;
-
-        do {
-            string email = check payload.email;
-            check authHandler.handleForgotPassword(email);
-            response.statusCode = 200;
-            response.setJsonPayload({"message": "If an account exists for this email, you will receive password reset instructions shortly."});
-        } on fail {
-            response.statusCode = 500;
-            response.setJsonPayload({"error": "An error occurred while processing your request."});
-        }
-
-        corsHandler.setCorsHeaders(response);
-        return response;
-    }
-
-    // Reset Password endpoint
-    resource function post reset\-password(@http:Payload json payload) returns http:Response {
-        http:Response response = new;
-
-        do {
-            string token = check payload.token;
-            string newPassword = check payload.newPassword;
-
-            check authHandler.resetPassword(token, newPassword);
-            response.statusCode = 200;
-            response.setJsonPayload({"message": "Your password has been successfully reset."});
-        } on fail var e {
-            response.statusCode = 400;
-            response.setJsonPayload({"error": e.message()});
-        }
-
-        corsHandler.setCorsHeaders(response);
-        return response;
-    }
-
-    // Logout endpoint
-    resource function post logout() returns http:Response {
-        http:Response response = new;
-        response.setJsonPayload({"message": "Logged out successfully"});
-        response.statusCode = 200;
-        
-        corsHandler.setCorsHeaders(response);
-        return response;
-    }
-
     // Registration endpoint
     resource function post register(@http:Payload json payload) returns http:Response|error {
         string username = check payload.username;
@@ -144,23 +96,52 @@ service /api on new http:Listener(serverPort) {
         return response;
     }
 
-    // Districts endpoint
-    resource function get districts() returns http:Response|error {
+    // Forgot Password endpoint
+    resource function post forgot\-password(@http:Payload json payload) returns http:Response {
+    http:Response response = new;
+    string successMessage = "If an account exists for this email, you will receive password reset instructions shortly.";
+
+    do {
+        string email = check payload.email;
+        // Even if handleForgotPassword returns an error, we don't want to expose that
+        _ = check authHandler.handleForgotPassword(email);
+        response.statusCode = 200;
+        response.setJsonPayload({"message": successMessage});
+    } on fail {
+        // Still return 200 with same message for security
+        response.statusCode = 200;
+        response.setJsonPayload({"message": successMessage});
+    }
+
+    corsHandler.setCorsHeaders(response);
+    return response;
+}
+
+    // Reset Password endpoint
+    resource function post reset\-password(@http:Payload json payload) returns http:Response {
         http:Response response = new;
-        
-        types:District[]|error districts = dbHandler.getDistricts();
-        if districts is error {
-            response.statusCode = 500;
-            response.setPayload({"error": "Failed to fetch districts"});
-        } else {
-            json[] jsonDistricts = districts.map(function(types:District district) returns json {
-                return {
-                    id: district.id,
-                    district_name: district.district_name
-                };
-            });
-            response.setJsonPayload(jsonDistricts);
+
+        do {
+            string token = check payload.token;
+            string newPassword = check payload.newPassword;
+
+            check authHandler.resetPassword(token, newPassword);
+            response.statusCode = 200;
+            response.setJsonPayload({"message": "Your password has been successfully reset."});
+        } on fail var e {
+            response.statusCode = 400;
+            response.setJsonPayload({"error": e.message()});
         }
+
+        corsHandler.setCorsHeaders(response);
+        return response;
+    }
+
+    // Logout endpoint
+    resource function post logout() returns http:Response {
+        http:Response response = new;
+        response.setJsonPayload({"message": "Logged out successfully"});
+        response.statusCode = 200;
         
         corsHandler.setCorsHeaders(response);
         return response;
@@ -182,6 +163,28 @@ service /api on new http:Listener(serverPort) {
                 };
             });
             response.setJsonPayload(jsonSubjects);
+        }
+        
+        corsHandler.setCorsHeaders(response);
+        return response;
+    }
+
+    // Districts endpoint
+    resource function get districts() returns http:Response|error {
+        http:Response response = new;
+        
+        types:District[]|error districts = dbHandler.getDistricts();
+        if districts is error {
+            response.statusCode = 500;
+            response.setPayload({"error": "Failed to fetch districts"});
+        } else {
+            json[] jsonDistricts = districts.map(function(types:District district) returns json {
+                return {
+                    id: district.id,
+                    district_name: district.district_name
+                };
+            });
+            response.setJsonPayload(jsonDistricts);
         }
         
         corsHandler.setCorsHeaders(response);
