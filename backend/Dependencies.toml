@@ -25,11 +25,10 @@ dependencies = [
 modules = [
 	{org = "asus", packageName = "backend", moduleName = "backend"},
 	{org = "asus", packageName = "backend", moduleName = "backend.auth"},
-	{org = "asus", packageName = "backend", moduleName = "backend.course"},
+	{org = "asus", packageName = "backend", moduleName = "backend.cors"},
 	{org = "asus", packageName = "backend", moduleName = "backend.db"},
-	{org = "asus", packageName = "backend", moduleName = "backend.email"},
-	{org = "asus", packageName = "backend", moduleName = "backend.user"},
-	{org = "asus", packageName = "backend", moduleName = "backend.utils"}
+	{org = "asus", packageName = "backend", moduleName = "backend.model"},
+	{org = "asus", packageName = "backend", moduleName = "backend.types"}
 ]
 
 [[package]]

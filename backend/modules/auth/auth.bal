@@ -1,17 +1,10 @@
-// auth.bal
 import ballerina/crypto;
 import ballerina/time;
 import ballerina/uuid;
 import ballerina/sql;
 import ballerinax/postgresql;
 import ballerina/email;
-
-public type User record {|
-    int id;
-    string username;
-    string email;
-    string password_hash;
-|};
+import backend.types;
 
 public class AuthHandler {
     private final postgresql:Client dbClient;
@@ -39,13 +32,13 @@ public class AuthHandler {
     }
 
     // Function to authenticate a user
-    public function authenticateUser(string email, string password) returns User|error {
+    public function authenticateUser(string email, string password) returns types:User|error {
         string hashedPassword = self.hashPassword(password);
         sql:ParameterizedQuery query = `
             SELECT * FROM users
             WHERE email = ${email} AND password_hash = ${hashedPassword}
         `;
-        User|sql:Error result = self.dbClient->queryRow(query);
+        types:User|sql:Error result = self.dbClient->queryRow(query);
         if result is sql:NoRowsError {
             return error("Authentication failed");
         }
@@ -56,9 +49,9 @@ public class AuthHandler {
     public function handleForgotPassword(string email) returns error? {
         // Check if the email exists in the database
         sql:ParameterizedQuery query = `SELECT * FROM users WHERE email = ${email}`;
-        User|error result = self.dbClient->queryRow(query);
+        types:User|error result = self.dbClient->queryRow(query);
 
-        if result is User {
+        if result is types:User {
             // Generate a secure random token
             string resetToken = uuid:createType1AsString();
 
@@ -96,9 +89,9 @@ public class AuthHandler {
             SELECT * FROM users 
             WHERE reset_token = ${hashedToken} AND reset_token_expires > CURRENT_TIMESTAMP
         `;
-        User|error result = self.dbClient->queryRow(query);
+        types:User|error result = self.dbClient->queryRow(query);
 
-        if result is User {
+        if result is types:User {
             // Hash the new password
             string hashedPassword = self.hashPassword(newPassword);
 
@@ -131,7 +124,7 @@ public class AuthHandler {
                 If you did not request a password reset, please ignore this email.
 
                 Best regards,
-                Your Application Team
+                Your UniHope Team
             `
         };
 

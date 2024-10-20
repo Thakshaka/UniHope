@@ -132,7 +132,7 @@ export default function Courses() {
     setInputData(userInputData);
     
     try {
-      const response = await fetch("http://localhost:8080/api/postUserInputData", {
+      const response = await fetch("http://localhost:8080/api/userInputData", {
         method: "POST",
         headers: {
           "Content-Type": "application/json", 
