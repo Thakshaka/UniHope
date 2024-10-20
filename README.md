@@ -80,15 +80,15 @@ dbPassword = ""
 dbPort = 
 
 # Email Configuration
-smtpHost = ""
+smtpHost = "smtp.gmail.com"
 smtpUsername = ""
 smtpPassword = ""
 
 # Server Configuration
-serverPort = 
+serverPort = 8080
 
 # Model API Configuration
-modelApiUrl = ""
+modelApiUrl = "http://localhost:8000"
 ```
 
 Run the Ballerina server:
