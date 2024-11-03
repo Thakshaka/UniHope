@@ -143,6 +143,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ## Contact
 
 Email: thakshakarathnayake20@gmail.com
+WhatsApp: +94 758447545
 
 ## Acknowledgements
 
