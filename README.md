@@ -1,7 +1,5 @@
 # UniHope 📈 AI-Based Personalized Courses Recommendation and Cutoff Prediction SaaS
 
-Team Name: SMTP Innovators
-
 ## Overview
 
 UniHope is an innovative AI-powered platform designed to assist Sri Lankan students in their university course selection process. By analyzing academic information, UniHope provides personalized course recommendations, helping students make informed decisions about their higher education journey.
@@ -142,8 +140,10 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Contact
 
+```
 Email: thakshakarathnayake20@gmail.com
 WhatsApp: +94 758447545
+```
 
 ## Acknowledgements
 
