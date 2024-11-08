@@ -23,7 +23,7 @@ Our research across social media platforms revealed thousands of students expres
 
 To address these challenges, we developed UniHope to automate this complex process. UniHope includes a machine learning model trained to predict cutoff Z scores for the upcoming year by analyzing historical data up to 10+ years and filtering out suitable courses for each student. What sets UniHope apart is its innovative approach to digitizing a complex manual task through modern technologies, ensuring a more effective and efficient solution. By developing UniHope, we aim to solve this long-standing problem for students and empower them to make informed decisions quickly and confidently, saving them time and reducing stress during a critical phase of their lives.
 
-## Screeshots
+## Screenshots
 
 |             ![home.png](./assets/images/home.png)             |
 | :-----------------------------------------------------------: |
