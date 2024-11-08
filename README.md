@@ -25,17 +25,23 @@ To address these challenges, we developed UniHope to automate this complex proce
 
 ## Screeshots
 
-<p align="center">
-    <img src="./assets/images/home.png" alt="Home Page" width="600"/>
-    <img src="./assets/images/courses.png" alt="Courses Page" width="600"/>
-    <img src="./assets/images/results.png" alt="Results Page" width="600"/>
-</p>
+|             ![home.png](./assets/images/home.png)             |
+| :-----------------------------------------------------------: |
+|                          _Home Page_                          |
+
+|             ![courses.png](./assets/images/courses.png)             |
+|    :-----------------------------------------------------------:    |
+|                           _Courses Page_                            |
+
+|             ![results.png](./assets/images/results.png)             |
+|    :-----------------------------------------------------------:    |   
+|                           _Results Page_                            |
 
 ## Features
 
 - Supports multiple languages (Sinhala, English, Tamil)
 - Utilizes machine learning to forecast course cutoff scores
-- Stores detailed information (unicode) about available university courses
+- Provides detailed information about available university courses
 - Tailors suggestions based on student’s academic profile
 - Accessible across various devices (desktop, tablet, mobile)
 - Processes student inputs and generates recommendations instantly
@@ -136,7 +142,7 @@ After setting up all components, access UniHope through `http://localhost:3000` 
 
 ## Contributing
 
-UniHope is currently in beta testing, with plans for a full release targeting 2024 G.C.E Advanced Level students. We're particularly focused on ensunng high accuracy in UniHope's predictions and developing additional features, as we understand the critical nature of these decisions in students' lives.
+UniHope is currently in beta testing, with plans for a full release targeting 2024 G.C.E Advanced Level students. We're particularly focused on ensuring high accuracy in UniHope's predictions and developing additional features, as we understand the critical nature of these decisions in students' lives.
 
 We warmly welcome contributions from the open-source community! If you'd like to contribute, please:
 
