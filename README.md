@@ -31,11 +31,11 @@ To address these challenges, we developed UniHope to automate this complex proce
 
 |             ![courses.png](./assets/images/courses.png)             |
 |    :-----------------------------------------------------------:    |
-|                           _Courses Page_                            |
+|                          _Search Page_                              |
 
 |             ![results.png](./assets/images/results.png)             |
 |    :-----------------------------------------------------------:    |   
-|                           _Results Page_                            |
+|                          _Recommendations_                          |
 
 ## Features
 
