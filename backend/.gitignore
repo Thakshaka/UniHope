@@ -18,5 +18,5 @@ Ballerina.lock
 *.jar
 
 # Config files with sensitive data
-Config.toml
+config.toml
 /resource
