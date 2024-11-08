@@ -159,7 +159,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ## Contact
 
 ```
-WhatsApp: +94 758447545
+WhatsApp: (+94)758447545
 ```
 
 ## Acknowledgements
