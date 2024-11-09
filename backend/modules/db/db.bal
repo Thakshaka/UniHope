@@ -2,7 +2,7 @@ import ballerina/sql;
 import ballerinax/postgresql;
 import backend.types;
 
-public client class DatabaseHandler {
+public isolated client class DatabaseHandler {
     private final postgresql:Client dbClient;
 
     public function init(postgresql:Client dbClient) {
@@ -10,7 +10,7 @@ public client class DatabaseHandler {
     }
 
     // Function to get all subjects from database
-    remote function getSubjects() returns types:Subject[]|error {
+    remote isolated function getSubjects() returns types:Subject[]|error {
         sql:ParameterizedQuery query = `SELECT * FROM subjects ORDER BY subject_name`;
         stream<types:Subject, sql:Error?> resultStream = self.dbClient->query(query);
         
@@ -24,7 +24,7 @@ public client class DatabaseHandler {
     }
 
     // Function to get all districts from database
-    remote function getDistricts() returns types:District[]|error {
+    remote isolated function getDistricts() returns types:District[]|error {
         sql:ParameterizedQuery query = `SELECT * FROM districts`;
         stream<types:District, sql:Error?> resultStream = self.dbClient->query(query);
         
@@ -38,7 +38,7 @@ public client class DatabaseHandler {
     }
 
     // Function to determine the category based on 3 subject inputs
-    remote function getCategory(string subject1, string subject2, string subject3) returns string|error {
+    remote isolated function getCategory(string subject1, string subject2, string subject3) returns string|error {
         sql:ParameterizedQuery query = `
             SELECT category 
             FROM Category_Combinations 

@@ -26,10 +26,10 @@ configurable int serverPort = ?;
 configurable string modelApiUrl = ?;
 
 // Define HTTP client to post data to model
-http:Client model = check new (modelApiUrl);
+final http:Client model = check new (modelApiUrl);
 
 // Initialize the PostgreSQL client
-postgresql:Client dbClient = check new(
+final postgresql:Client dbClient = check new(
     host = dbHost,
     database = dbName,
     username = dbUsername,
@@ -38,16 +38,16 @@ postgresql:Client dbClient = check new(
 );
 
 // Initialize the SMTP client
-email:SmtpClient smtpClient = check new (smtpHost, smtpUsername, smtpPassword);
+final email:SmtpClient smtpClient = check new (smtpHost, smtpUsername, smtpPassword);
 
 // Initialize handlers
-auth:AuthHandler authHandler = new(dbClient, smtpClient);
-db:DatabaseHandler dbHandler = new(dbClient);
-cors:CorsHandler corsHandler = new("http://localhost:3000");
+final auth:AuthHandler authHandler = new(dbClient, smtpClient);
+final db:DatabaseHandler dbHandler = new(dbClient);
+final cors:CorsHandler corsHandler = new("http://localhost:3000");
 
 service /api on new http:Listener(serverPort) {
     // Registration endpoint
-    resource function post register(@http:Payload json payload) returns http:Response|error {
+    isolated resource function post register(@http:Payload json payload) returns http:Response|error {
         string username = check payload.username;
         string email = check payload.email;
         string password = check payload.password;
@@ -68,7 +68,7 @@ service /api on new http:Listener(serverPort) {
     }
 
     // Login endpoint
-    resource function post login(@http:Payload json payload) returns http:Response|error {
+    isolated resource function post login(@http:Payload json payload) returns http:Response|error {
         string email = check payload.email;
         string password = check payload.password;
 
@@ -100,7 +100,7 @@ service /api on new http:Listener(serverPort) {
     }
 
     // Forgot Password endpoint
-    resource function post forgot\-password(@http:Payload json payload) returns http:Response {
+    isolated resource function post forgot\-password(@http:Payload json payload) returns http:Response {
     http:Response response = new;
     string successMessage = "If an account exists for this email, you will receive password reset instructions shortly.";
 
@@ -121,7 +121,7 @@ service /api on new http:Listener(serverPort) {
 }
 
     // Reset Password endpoint
-    resource function post reset\-password(@http:Payload json payload) returns http:Response {
+    isolated resource function post reset\-password(@http:Payload json payload) returns http:Response {
         http:Response response = new;
 
         do {
@@ -151,7 +151,7 @@ service /api on new http:Listener(serverPort) {
     }
 
     // Subjects endpoint
-    resource function get subjects() returns http:Response|error {
+    isolated resource function get subjects() returns http:Response|error {
         http:Response response = new;
         
         types:Subject[]|error subjects = dbHandler->getSubjects();
@@ -159,7 +159,7 @@ service /api on new http:Listener(serverPort) {
             response.statusCode = 500;
             response.setPayload({"error": "Failed to fetch subjects"});
         } else {
-            json[] jsonSubjects = subjects.map(function(types:Subject subject) returns json {
+            json[] jsonSubjects = subjects.map(isolated function(types:Subject subject) returns json {
                 return {
                     id: subject.id,
                     subject_name: subject.subject_name
@@ -173,7 +173,7 @@ service /api on new http:Listener(serverPort) {
     }
 
     // Districts endpoint
-    resource function get districts() returns http:Response|error {
+    isolated resource function get districts() returns http:Response|error {
         http:Response response = new;
         
         types:District[]|error districts = dbHandler->getDistricts();
@@ -181,7 +181,7 @@ service /api on new http:Listener(serverPort) {
             response.statusCode = 500;
             response.setPayload({"error": "Failed to fetch districts"});
         } else {
-            json[] jsonDistricts = districts.map(function(types:District district) returns json {
+            json[] jsonDistricts = districts.map(isolated function(types:District district) returns json {
                 return {
                     id: district.id,
                     district_name: district.district_name
@@ -195,7 +195,7 @@ service /api on new http:Listener(serverPort) {
     }
 
     // Handle POST request for user input data
-    resource function post userInputData(http:Caller caller, http:Request req) returns error? {
+    isolated resource function post userInputData(http:Caller caller, http:Request req) returns error? {
         json userInputData = check req.getJsonPayload();
 
         string subject1 = check userInputData.subject1;
@@ -242,35 +242,35 @@ service /api on new http:Listener(serverPort) {
     }
 
     // CORS preflight handlers
-    resource function options forgot\-password() returns http:Response {
+    isolated resource function options forgot\-password() returns http:Response {
         return corsHandler.getPreflightResponse();
     }
     
-    resource function options reset\-password() returns http:Response {
+    isolated resource function options reset\-password() returns http:Response {
         return corsHandler.getPreflightResponse();
     }
 
-    resource function options logout() returns http:Response {
+    isolated resource function options logout() returns http:Response {
         return corsHandler.getPreflightResponse();
     }
 
-    resource function options register() returns http:Response {
+    isolated resource function options register() returns http:Response {
         return corsHandler.getPreflightResponse();
     }
 
-    resource function options login() returns http:Response {
+    isolated resource function options login() returns http:Response {
         return corsHandler.getPreflightResponse();
     }
 
-    resource function options districts() returns http:Response {
+    isolated resource function options districts() returns http:Response {
         return corsHandler.getPreflightResponse();
     }
 
-    resource function options subjects() returns http:Response {
+    isolated resource function options subjects() returns http:Response {
         return corsHandler.getPreflightResponse();
     }
 
-    resource function options userInputData() returns http:Response {
+    isolated resource function options userInputData() returns http:Response {
         return corsHandler.getPreflightResponse();
     }
 }
