@@ -5,7 +5,6 @@ import ballerina/email;
 import backend.auth;
 import backend.db;
 import backend.types;
-import backend.cors;
 
 // Configure the PostgreSQL connection
 configurable string dbHost = ?;
@@ -43,7 +42,6 @@ final email:SmtpClient smtpClient = check new (smtpHost, smtpUsername, smtpPassw
 // Initialize handlers
 final auth:AuthHandler authHandler = new(dbClient, smtpClient);
 final db:DatabaseHandler dbHandler = new(dbClient);
-final cors:CorsHandler corsHandler = new("http://localhost:3000");
 
 // Record type for Registration Payload
 public type RegistrationPayload record {|
@@ -58,225 +56,162 @@ public type LoginPayload record {|
     string password;
 |};
 
+// Record type for Forgot Password Payload
+public type ForgotPasswordPayload record {|
+    string email;
+|};
+
+// Record type for Reset Password Payload
+public type ResetPasswordPayload record {|
+    string token;
+    string newPassword;
+|};
+
+// Record type for User Input Payload
+public type UserInputPayload record {|
+        string subject1;
+        string subject2;
+        string subject3;
+        string zScore;
+        string year;
+        string district;
+    |};
+
+// Add service-level CORS configuration
+@http:ServiceConfig {
+    cors: {
+        allowOrigins: ["http://localhost:3000"],
+        allowCredentials: true,
+        allowHeaders: ["Content-Type", "Authorization"],
+        maxAge: 84900
+    }
+}
+
 service /api on new http:Listener(serverPort) {
     // Registration endpoint
-    isolated resource function post register(RegistrationPayload payload) returns http:Response|error {
-        http:Response response = new;
-
+    isolated resource function post register(RegistrationPayload payload) returns http:Created|http:BadRequest {
         do {
             check authHandler->registerUser(payload.username, payload.email, payload.password);
-            response.statusCode = 201;
-            response.setJsonPayload({"message": "User registered successfully"});
+            return <http:Created> { body: { message: "User registered successfully" } };
         } on fail var e {
-            response.statusCode = 400;
-            response.setJsonPayload({"error": e.message()});
+            return <http:BadRequest> { body: { message: e.message() } };
         }
-
-        corsHandler.setCorsHeaders(response);
-        return response;
     }
 
     // Login endpoint
-    isolated resource function post login(LoginPayload payload) returns http:Response|error {
-        http:Response response = new;
-
+    isolated resource function post login(LoginPayload payload) returns http:Ok|http:Unauthorized|http:InternalServerError {
         do {
             types:User|error authResult = check authHandler->authenticateUser(payload.email, payload.password);
             if authResult is types:User {
-                response.statusCode = 200;
-                response.setJsonPayload({
-                    "message": "Login successful",
-                    "user": {
-                        "id": authResult.id,
-                        "username": authResult.username,
-                        "email": authResult.email
+                return <http:Ok> {
+                    body: {
+                        message: "Login successful",
+                        user: {
+                            id: authResult.id,
+                            username: authResult.username,
+                            email: authResult.email
+                        }
                     }
-                });
+                };
             } else {
-                response.statusCode = 401;
-                response.setJsonPayload({"error": "Invalid credentials"});
+                return <http:Unauthorized> {
+                    body: {message: "Invalid credentials"}
+                };
             }
         } on fail {
-            response.statusCode = 500;
-            response.setJsonPayload({"error": "Internal server error"});
+            return <http:InternalServerError> {
+                body: {message: "Internal server error"}
+            };
         }
-
-        corsHandler.setCorsHeaders(response);
-        return response;
     }
 
     // Forgot Password endpoint
-    isolated resource function post forgot\-password(@http:Payload json payload) returns http:Response {
-    http:Response response = new;
-    string successMessage = "If an account exists for this email, you will receive password reset instructions shortly.";
-
-    do {
-        string email = check payload.email;
-        // Even if handleForgotPassword returns an error, we don't want to expose that
-        _ = check authHandler->handleForgotPassword(email);
-        response.statusCode = 200;
-        response.setJsonPayload({"message": successMessage});
-    } on fail {
-        // Still return 200 with same message for security
-        response.statusCode = 200;
-        response.setJsonPayload({"message": successMessage});
+    isolated resource function post forgot\-password(ForgotPasswordPayload payload) returns http:Ok {
+        do {
+            _ = check authHandler->handleForgotPassword(payload.email);
+        } on fail {
+            // Intentionally ignore errors to prevent email enumeration
+        }
+        return {
+            body: { message: "If an account exists for this email, you will receive password reset instructions shortly." }
+        };
     }
 
-    corsHandler.setCorsHeaders(response);
-    return response;
-}
-
     // Reset Password endpoint
-    isolated resource function post reset\-password(@http:Payload json payload) returns http:Response {
-        http:Response response = new;
-
+    isolated resource function post reset\-password(ResetPasswordPayload payload) returns http:Ok|http:BadRequest {
         do {
-            string token = check payload.token;
-            string newPassword = check payload.newPassword;
-
-            check authHandler->resetPassword(token, newPassword);
-            response.statusCode = 200;
-            response.setJsonPayload({"message": "Your password has been successfully reset."});
+            check authHandler->resetPassword(payload.token, payload.newPassword);
+            return <http:Ok>{
+                body: {message: "Your password has been successfully reset."}
+            };
         } on fail var e {
-            response.statusCode = 400;
-            response.setJsonPayload({"error": e.message()});
+            return <http:BadRequest>{ 
+                body: {message: e.message()}
+            };
         }
-
-        corsHandler.setCorsHeaders(response);
-        return response;
     }
 
     // Logout endpoint
-    resource function post logout() returns http:Response {
-        http:Response response = new;
-        response.setJsonPayload({"message": "Logged out successfully"});
-        response.statusCode = 200;
-        
-        corsHandler.setCorsHeaders(response);
-        return response;
+    resource function post logout() returns http:Ok {
+        return { body: { message: "Logged out successfully" } };
     }
 
     // Subjects endpoint
-    isolated resource function get subjects() returns http:Response|error {
-        http:Response response = new;
-        
+    isolated resource function get subjects() returns types:Subject[]|http:InternalServerError {
         types:Subject[]|error subjects = dbHandler->getSubjects();
         if subjects is error {
-            response.statusCode = 500;
-            response.setPayload({"error": "Failed to fetch subjects"});
+            return { body: { message: "Failed to fetch subjects" } };
         } else {
-            json[] jsonSubjects = subjects.map(isolated function(types:Subject subject) returns json {
-                return {
-                    id: subject.id,
-                    subject_name: subject.subject_name
-                };
-            });
-            response.setJsonPayload(jsonSubjects);
+            return subjects;
         }
-        
-        corsHandler.setCorsHeaders(response);
-        return response;
     }
 
     // Districts endpoint
-    isolated resource function get districts() returns http:Response|error {
-        http:Response response = new;
+    isolated resource function get districts() returns types:District[]|http:InternalServerError {
         
         types:District[]|error districts = dbHandler->getDistricts();
         if districts is error {
-            response.statusCode = 500;
-            response.setPayload({"error": "Failed to fetch districts"});
+            return { body: { message: "Failed to fetch districts" } };
         } else {
-            json[] jsonDistricts = districts.map(isolated function(types:District district) returns json {
-                return {
-                    id: district.id,
-                    district_name: district.district_name
-                };
-            });
-            response.setJsonPayload(jsonDistricts);
+            return districts;
         }
-        
-        corsHandler.setCorsHeaders(response);
-        return response;
     }
 
     // Handle POST request for user input data
-    isolated resource function post userInputData(http:Caller caller, http:Request req) returns error? {
-        json userInputData = check req.getJsonPayload();
+    isolated resource function post userInputData(UserInputPayload payload) returns http:Ok|http:InternalServerError {
+        do {
+            string category = check dbHandler->getCategory(payload.subject1, payload.subject2, payload.subject3);
 
-        string subject1 = check userInputData.subject1;
-        string subject2 = check userInputData.subject2;
-        string subject3 = check userInputData.subject3;
-        string zScore = check userInputData.zScore;
-        string year = check userInputData.year;
-        string district = check userInputData.district;
+            json modelRequest = {
+                category: category,
+                district: payload.district,
+                year: payload.year
+            };
 
-        string category = check dbHandler->getCategory(subject1, subject2, subject3);
+            json[] modelResponseData = check model->post("/predict", modelRequest);
 
-        json modelRequest = {
-            "category": category,
-            "district": district,
-            "year": year
-        };
+            float zScoreValue = check 'float:fromString(payload.zScore);
 
-        http:Response modelRes = check model->post("/predict", modelRequest);
-        json modelResponseData = check modelRes.getJsonPayload();
+            json[] filteredModelResponseData = [];
 
-        json[] filteredModelResponseData = [];
-
-        float zScoreValue = check 'float:fromString(zScore);
-
-        if (modelResponseData is json[]) {
             foreach json obj in modelResponseData {
                 float this_year_predicted = check obj.this_year_predicted;
                 if (this_year_predicted <= zScoreValue) {
                     filteredModelResponseData.push(obj);
                 }
             }
+
+            return <http:Ok> {
+                body:  {
+                    modelResponseData: modelResponseData,
+                    filteredModelResponseData: filteredModelResponseData,
+                    category: category
+                }
+            };
+        } on fail var e {
+            return <http:InternalServerError> {
+                body: { message: e.message() }
+            };
         }
-
-        json Response = {
-            "modelResponseData": modelResponseData,
-            "filteredModelResponseData": filteredModelResponseData,
-            "category": category
-        };
-
-        http:Response res = new;
-        res.setJsonPayload(Response);
-        corsHandler.setCorsHeaders(res);
-        check caller->respond(res);
-    }
-
-    // CORS preflight handlers
-    isolated resource function options forgot\-password() returns http:Response {
-        return corsHandler.getPreflightResponse();
-    }
-    
-    isolated resource function options reset\-password() returns http:Response {
-        return corsHandler.getPreflightResponse();
-    }
-
-    isolated resource function options logout() returns http:Response {
-        return corsHandler.getPreflightResponse();
-    }
-
-    isolated resource function options register() returns http:Response {
-        return corsHandler.getPreflightResponse();
-    }
-
-    isolated resource function options login() returns http:Response {
-        return corsHandler.getPreflightResponse();
-    }
-
-    isolated resource function options districts() returns http:Response {
-        return corsHandler.getPreflightResponse();
-    }
-
-    isolated resource function options subjects() returns http:Response {
-        return corsHandler.getPreflightResponse();
-    }
-
-    isolated resource function options userInputData() returns http:Response {
-        return corsHandler.getPreflightResponse();
     }
 }
