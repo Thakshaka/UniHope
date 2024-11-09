@@ -142,11 +142,11 @@ service /api on new http:Listener(serverPort) {
         do {
             check authHandler->resetPassword(payload.token, payload.newPassword);
             return <http:Ok>{
-                body: {message: "Your password has been successfully reset."}
+                body: { message: "Your password has been successfully reset." }
             };
         } on fail var e {
             return <http:BadRequest>{ 
-                body: {message: e.message()}
+                body: { message: e.message() }
             };
         }
     }
