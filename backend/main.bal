@@ -45,17 +45,26 @@ final auth:AuthHandler authHandler = new(dbClient, smtpClient);
 final db:DatabaseHandler dbHandler = new(dbClient);
 final cors:CorsHandler corsHandler = new("http://localhost:3000");
 
+// Record type for Registration Payload
+public type RegistrationPayload record {|
+    string username;
+    string email;
+    string password;
+|};
+
+// Record type for Login Payload
+public type LoginPayload record {|
+    string email;
+    string password;
+|};
+
 service /api on new http:Listener(serverPort) {
     // Registration endpoint
-    isolated resource function post register(@http:Payload json payload) returns http:Response|error {
-        string username = check payload.username;
-        string email = check payload.email;
-        string password = check payload.password;
-
+    isolated resource function post register(RegistrationPayload payload) returns http:Response|error {
         http:Response response = new;
 
         do {
-            check authHandler->registerUser(username, email, password);
+            check authHandler->registerUser(payload.username, payload.email, payload.password);
             response.statusCode = 201;
             response.setJsonPayload({"message": "User registered successfully"});
         } on fail var e {
@@ -68,14 +77,11 @@ service /api on new http:Listener(serverPort) {
     }
 
     // Login endpoint
-    isolated resource function post login(@http:Payload json payload) returns http:Response|error {
-        string email = check payload.email;
-        string password = check payload.password;
-
+    isolated resource function post login(LoginPayload payload) returns http:Response|error {
         http:Response response = new;
 
         do {
-            types:User|error authResult = check authHandler->authenticateUser(email, password);
+            types:User|error authResult = check authHandler->authenticateUser(payload.email, payload.password);
             if authResult is types:User {
                 response.statusCode = 200;
                 response.setJsonPayload({
