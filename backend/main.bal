@@ -55,7 +55,7 @@ service /api on new http:Listener(serverPort) {
         http:Response response = new;
 
         do {
-            check authHandler.registerUser(username, email, password);
+            check authHandler->registerUser(username, email, password);
             response.statusCode = 201;
             response.setJsonPayload({"message": "User registered successfully"});
         } on fail var e {
@@ -75,7 +75,7 @@ service /api on new http:Listener(serverPort) {
         http:Response response = new;
 
         do {
-            types:User|error authResult = check authHandler.authenticateUser(email, password);
+            types:User|error authResult = check authHandler->authenticateUser(email, password);
             if authResult is types:User {
                 response.statusCode = 200;
                 response.setJsonPayload({
@@ -107,7 +107,7 @@ service /api on new http:Listener(serverPort) {
     do {
         string email = check payload.email;
         // Even if handleForgotPassword returns an error, we don't want to expose that
-        _ = check authHandler.handleForgotPassword(email);
+        _ = check authHandler->handleForgotPassword(email);
         response.statusCode = 200;
         response.setJsonPayload({"message": successMessage});
     } on fail {
@@ -128,7 +128,7 @@ service /api on new http:Listener(serverPort) {
             string token = check payload.token;
             string newPassword = check payload.newPassword;
 
-            check authHandler.resetPassword(token, newPassword);
+            check authHandler->resetPassword(token, newPassword);
             response.statusCode = 200;
             response.setJsonPayload({"message": "Your password has been successfully reset."});
         } on fail var e {
@@ -154,7 +154,7 @@ service /api on new http:Listener(serverPort) {
     resource function get subjects() returns http:Response|error {
         http:Response response = new;
         
-        types:Subject[]|error subjects = dbHandler.getSubjects();
+        types:Subject[]|error subjects = dbHandler->getSubjects();
         if subjects is error {
             response.statusCode = 500;
             response.setPayload({"error": "Failed to fetch subjects"});
@@ -176,7 +176,7 @@ service /api on new http:Listener(serverPort) {
     resource function get districts() returns http:Response|error {
         http:Response response = new;
         
-        types:District[]|error districts = dbHandler.getDistricts();
+        types:District[]|error districts = dbHandler->getDistricts();
         if districts is error {
             response.statusCode = 500;
             response.setPayload({"error": "Failed to fetch districts"});
@@ -205,7 +205,7 @@ service /api on new http:Listener(serverPort) {
         string year = check userInputData.year;
         string district = check userInputData.district;
 
-        string category = check dbHandler.getCategory(subject1, subject2, subject3);
+        string category = check dbHandler->getCategory(subject1, subject2, subject3);
 
         json modelRequest = {
             "category": category,
