@@ -11,7 +11,9 @@ UniHope aims to tackle an important issue that almost every Sri Lankan G.C.E Adv
 ## Current Challenges
 
 We noticed that around 300,000 students participate in G.C.E Advanced Level Examination per year, and more than half of them become eligible to enter state universities. However, most students face recurring issues in navigating the university admission handbook provided by the University Grants Commission in Sri Lanka. The process is time-consuming, often confusing, and particularly challenging for students with lower Z scores who frequently miss out on eligible courses due to lack of awareness and the handbook's complexity. It's not just about choosing courses; it's about making life-changing decisions under pressure, often without proper guidance or tools to help them understand their full range of opportunities.
-Research Findings
+
+## Research Findings
+
 Our research across social media platforms revealed thousands of students expressing their concerns about university admissions. From YouTube channels to Facebook pages, we analyzed these comments and identified four critical questions that students repeatedly ask every year:
 
 1. "I studied Mathematics for A/Ls and my Z-score is 1.6550. Will I be able to get into an engineering course this year?"
