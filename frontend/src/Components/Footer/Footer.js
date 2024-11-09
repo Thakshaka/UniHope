@@ -20,7 +20,7 @@ export default function Footer() {
               <h5>UniHope</h5>
 
               <p className="description">
-              An innovative AI-powered platform designed to assist Sri Lankan students in their university course selection process. We analyze your academic profile to provide personalized course recommendations, helping you make informed decisions about your higher education journey. Our user-friendly interface and multi-language support ensure accessibility for all, while our advanced algorithms offer up-to-date insights on course cutoff predictions. At UniHope, we're committed to simplifying your path to the right university course and empowering your academic future.
+                UniHope is an innovative AI-powered platform designed to assist Sri Lankan G.C.E Advanced Level students in their state university course selection process. UniHope analyzes your academic profiles to provide personalized course recommendations, helping you make informed decisions about your higher education journey. UniHope's user-friendly interface and multi-language support ensure accessibility for all, while its advanced algorithms offer up-to-date insights on state university course cutoff predictions. At UniHope, we're committed to simplifying your paths to the right state university course and empowering your academic future.
               </p>
             </div>
 
