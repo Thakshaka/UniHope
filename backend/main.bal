@@ -192,14 +192,10 @@ service /api on new http:Listener(serverPort) {
 
             float zScoreValue = check 'float:fromString(payload.zScore);
 
-            json[] filteredModelResponseData = [];
-
-            foreach json obj in modelResponseData {
-                float this_year_predicted = check obj.this_year_predicted;
-                if (this_year_predicted <= zScoreValue) {
-                    filteredModelResponseData.push(obj);
-                }
-            }
+            json[] filteredModelResponseData = from json obj in modelResponseData
+                                 let float this_year_predicted = check obj.this_year_predicted
+                                 where this_year_predicted <= zScoreValue
+                                 select obj;
 
             return <http:Ok> {
                 body:  {
