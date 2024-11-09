@@ -19,7 +19,10 @@ configurable string smtpHost = ?;
 configurable string smtpUsername = ?;
 configurable string smtpPassword = ?;
 
+// Configue Server
 configurable int serverPort = ?;
+
+// Configure Model API
 configurable string modelApiUrl = ?;
 
 // Define HTTP client to post data to model
