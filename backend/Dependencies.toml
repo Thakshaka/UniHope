@@ -26,7 +26,6 @@ dependencies = [
 modules = [
 	{org = "asus", packageName = "backend", moduleName = "backend"},
 	{org = "asus", packageName = "backend", moduleName = "backend.auth"},
-	{org = "asus", packageName = "backend", moduleName = "backend.cors"},
 	{org = "asus", packageName = "backend", moduleName = "backend.db"},
 	{org = "asus", packageName = "backend", moduleName = "backend.types"}
 ]
@@ -360,7 +359,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "postgresql"
-version = "1.13.1"
+version = "1.13.2"
 dependencies = [
 	{org = "ballerina", name = "crypto"},
 	{org = "ballerina", name = "io"},

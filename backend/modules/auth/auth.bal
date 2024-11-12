@@ -1,3 +1,5 @@
+// auth.bal
+
 import ballerina/crypto;
 import ballerina/uuid;
 import ballerina/sql;
@@ -6,7 +8,7 @@ import ballerina/email;
 import backend.types;
 import ballerina/io;
 
-public class AuthHandler {
+public isolated client class AuthHandler {
     private final postgresql:Client dbClient;
     private final email:SmtpClient smtpClient;
 
@@ -22,7 +24,7 @@ public class AuthHandler {
     }
 
     // Function to register a new user
-    public function registerUser(string username, string email, string password) returns error? {
+    remote isolated function registerUser(string username, string email, string password) returns error? {
         string hashedPassword = self.hashPassword(password);
         sql:ParameterizedQuery query = `
             INSERT INTO users (username, email, password_hash)
@@ -32,7 +34,7 @@ public class AuthHandler {
     }
 
     // Function to authenticate a user
-    public function authenticateUser(string email, string password) returns types:User|error {
+    remote isolated function authenticateUser(string email, string password) returns types:User|error {
         string hashedPassword = self.hashPassword(password);
         sql:ParameterizedQuery query = `
             SELECT * FROM users
@@ -46,7 +48,7 @@ public class AuthHandler {
     }
 
     // Function to handle forgot password request
-    public function handleForgotPassword(string email) returns error? {
+    remote isolated function handleForgotPassword(string email) returns error? {
         // Check if the email exists in the database
         sql:ParameterizedQuery query = `SELECT * FROM users WHERE email = ${email}`;
         types:User|error result = self.dbClient->queryRow(query);
@@ -86,7 +88,7 @@ public class AuthHandler {
     }
 
     // Function to reset password
-    public function resetPassword(string token, string newPassword) returns error? {
+    remote isolated function resetPassword(string token, string newPassword) returns error? {
         // Hash the provided token
         byte[] tokenHash = crypto:hashSha256(token.toBytes());
         string hashedToken = tokenHash.toBase16();
@@ -115,7 +117,7 @@ public class AuthHandler {
     }
 
     // Function to send password reset email
-    private function sendPasswordResetEmail(string toEmail, string resetUrl) returns error? {
+    private isolated function sendPasswordResetEmail(string toEmail, string resetUrl) returns error? {
         email:Message message = {
             to: [toEmail],
             subject: "Password Reset Instructions",
