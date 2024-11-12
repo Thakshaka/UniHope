@@ -167,9 +167,9 @@ service /api on new http:Listener(serverPort) {
 
             return <http:Ok> {
                 body:  {
-                    modelResponseData: modelResponseData,
-                    filteredModelResponseData: filteredModelResponseData,
-                    category: category
+                    modelResponseData,
+                    filteredModelResponseData,
+                    category
                 }
             };
         } on fail var e {
