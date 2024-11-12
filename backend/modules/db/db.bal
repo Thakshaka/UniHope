@@ -1,3 +1,5 @@
+// db.bal
+
 import ballerina/sql;
 import ballerinax/postgresql;
 import backend.types;

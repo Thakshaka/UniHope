@@ -1,3 +1,5 @@
+// main.bal
+
 import ballerina/http;
 import ballerinax/postgresql;
 import ballerinax/postgresql.driver as _;
@@ -43,40 +45,6 @@ final email:SmtpClient smtpClient = check new (smtpHost, smtpUsername, smtpPassw
 final auth:AuthHandler authHandler = new(dbClient, smtpClient);
 final db:DatabaseHandler dbHandler = new(dbClient);
 
-// Record type for Registration Payload
-public type RegistrationPayload record {|
-    string username;
-    string email;
-    string password;
-|};
-
-// Record type for Login Payload
-public type LoginPayload record {|
-    string email;
-    string password;
-|};
-
-// Record type for Forgot Password Payload
-public type ForgotPasswordPayload record {|
-    string email;
-|};
-
-// Record type for Reset Password Payload
-public type ResetPasswordPayload record {|
-    string token;
-    string newPassword;
-|};
-
-// Record type for User Input Payload
-public type UserInputPayload record {|
-        string subject1;
-        string subject2;
-        string subject3;
-        string zScore;
-        string year;
-        string district;
-    |};
-
 // Add service-level CORS configuration
 @http:ServiceConfig {
     cors: {
@@ -89,7 +57,7 @@ public type UserInputPayload record {|
 
 service /api on new http:Listener(serverPort) {
     // Registration endpoint
-    isolated resource function post register(RegistrationPayload payload) returns http:Created|http:BadRequest {
+    isolated resource function post register(types:RegistrationPayload payload) returns http:Created|http:BadRequest {
         do {
             check authHandler->registerUser(payload.username, payload.email, payload.password);
             return <http:Created> { body: { message: "User registered successfully" } };
@@ -99,7 +67,7 @@ service /api on new http:Listener(serverPort) {
     }
 
     // Login endpoint
-    isolated resource function post login(LoginPayload payload) returns http:Ok|http:Unauthorized|http:InternalServerError {
+    isolated resource function post login(types:LoginPayload payload) returns http:Ok|http:Unauthorized|http:InternalServerError {
         do {
             types:User|error authResult = check authHandler->authenticateUser(payload.email, payload.password);
             if authResult is types:User {
@@ -126,7 +94,7 @@ service /api on new http:Listener(serverPort) {
     }
 
     // Forgot Password endpoint
-    isolated resource function post forgot\-password(ForgotPasswordPayload payload) returns http:Ok {
+    isolated resource function post forgot\-password(types:ForgotPasswordPayload payload) returns http:Ok {
         do {
             _ = check authHandler->handleForgotPassword(payload.email);
         } on fail {
@@ -138,7 +106,7 @@ service /api on new http:Listener(serverPort) {
     }
 
     // Reset Password endpoint
-    isolated resource function post reset\-password(ResetPasswordPayload payload) returns http:Ok|http:BadRequest {
+    isolated resource function post reset\-password(types:ResetPasswordPayload payload) returns http:Ok|http:BadRequest {
         do {
             check authHandler->resetPassword(payload.token, payload.newPassword);
             return <http:Ok>{
@@ -178,7 +146,7 @@ service /api on new http:Listener(serverPort) {
     }
 
     // Handle POST request for user input data
-    isolated resource function post userInputData(UserInputPayload payload) returns http:Ok|http:InternalServerError {
+    isolated resource function post userInputData(types:UserInputPayload payload) returns http:Ok|http:InternalServerError {
         do {
             string category = check dbHandler->getCategory(payload.subject1, payload.subject2, payload.subject3);
 
