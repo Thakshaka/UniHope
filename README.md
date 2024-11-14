@@ -41,9 +41,13 @@ To address these challenges, we developed UniHope to automate this complex proce
 
 ## Dataset & Machine Learning Model
 
+The dataset comprises historical university course cutoff Z-scores across various districts and universities over multiple years. Each entry contains the stream, district, unique course code (unicode), course name, university, year, and Z-score cutoff. Currently, we manually populate this data by extracting information from past UGC handbooks, but we aim to automate this process in the future for better accuracy and efficiency.
+
 |             ![dataset.jpg](./assets/images/dataset.jpg)             |
 |    :-----------------------------------------------------------:    |
 |                            _Dataset_                                |
+
+The machine learning model utilizes polynomial regression, trained on historical cutoff data spanning more than 10 years, to predict course cutoff Z-scores for the upcoming year. By analyzing patterns across years, districts, and streams, the model achieves precision up to three decimal points in its predictions. It takes inputs such as stream, district, and year, then processes historical trends to forecast cutoff Z-scores.
 
 ## Future Plans
 
